@@ -50,37 +50,40 @@ function addMarker(lat, lon) {
     const marker = new THREE.Mesh(geometry, material);
 
     marker.position.copy(position);
-    earth.add(marker); // 🔥 FØLG JORDEN
+    earth.add(marker);
 }
 
-// ✔️ Tegn bue og lav animeret "skud"
+// ✔️ Tegn bue (visuelt) og lav animeret skud (dynamisk)
 function createShootingArc(fromLat, fromLon, toLat, toLon) {
     const start = latLongToVector3(fromLat, fromLon);
     const end = latLongToVector3(toLat, toLon);
 
     const mid = start.clone().add(end).multiplyScalar(0.5);
-    mid.normalize().multiplyScalar(5 + 1.5); // Højde på buen
+    mid.normalize().multiplyScalar(5 + 1.5);
 
     const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
 
-    // Tegn buen (følger jorden)
+    // Tegn buen (visuelt)
     const points = curve.getPoints(50);
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     const material = new THREE.LineBasicMaterial({ color: 0x00ffff });
     const arc = new THREE.Line(geometry, material);
-    earth.add(arc); // 🔥 FØLG JORDEN
+    earth.add(arc);
 
-    // Kuglen der bevæger sig (uafhængig af jorden)
+    // Kugle der flyver (dynamisk)
     const sphereGeometry = new THREE.SphereGeometry(0.05, 8, 8);
     const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0xffff00 });
     const movingSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    scene.add(movingSphere); // 🔥 Uafhængig af jordens rotation
+    scene.add(movingSphere);
 
-    // Tilføj til animationslisten
+    // Gem rute og kugle til animation (baseret på lat/lon)
     animations.push({
-        curve: curve,
+        fromLat,
+        fromLon,
+        toLat,
+        toLon,
         sphere: movingSphere,
-        progress: Math.random() // Start et tilfældigt sted
+        progress: Math.random()
     });
 }
 
@@ -113,13 +116,24 @@ function animate() {
 
     // Animation af kugler på buerne
     animations.forEach(obj => {
-        obj.progress += 0.01; // Speed – juster op/ned
+        obj.progress += 0.01;
+        if (obj.progress > 1) obj.progress = 0;
 
-        if (obj.progress > 1) {
-            obj.progress = 0; // Loop igen
-        }
+        // Beregn ny start og slut position baseret på jordens rotation
+        const start = latLongToVector3(obj.fromLat, obj.fromLon).applyAxisAngle(
+            new THREE.Vector3(0, 1, 0),
+            earth.rotation.y
+        );
+        const end = latLongToVector3(obj.toLat, obj.toLon).applyAxisAngle(
+            new THREE.Vector3(0, 1, 0),
+            earth.rotation.y
+        );
+        const mid = start.clone().add(end).multiplyScalar(0.5);
+        mid.normalize().multiplyScalar(5 + 1.5);
 
-        const point = obj.curve.getPoint(obj.progress);
+        const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
+
+        const point = curve.getPoint(obj.progress);
         obj.sphere.position.copy(point);
     });
 
