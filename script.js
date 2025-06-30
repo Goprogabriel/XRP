@@ -41,7 +41,7 @@ function latLongToVector3(lat, lon, radius = 5) {
     return new THREE.Vector3(x, y, z);
 }
 
-// ✔️ Tilføj marker/punkt
+// ✔️ Tilføj marker/punkt (følger jorden)
 function addMarker(lat, lon) {
     const position = latLongToVector3(lat, lon);
 
@@ -50,7 +50,7 @@ function addMarker(lat, lon) {
     const marker = new THREE.Mesh(geometry, material);
 
     marker.position.copy(position);
-    scene.add(marker);
+    earth.add(marker); // 🔥 FØLG JORDEN
 }
 
 // ✔️ Tegn bue og lav animeret "skud"
@@ -63,18 +63,18 @@ function createShootingArc(fromLat, fromLon, toLat, toLon) {
 
     const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
 
-    // Tegn buen (valgfrit)
+    // Tegn buen (følger jorden)
     const points = curve.getPoints(50);
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     const material = new THREE.LineBasicMaterial({ color: 0x00ffff });
     const arc = new THREE.Line(geometry, material);
-    scene.add(arc);
+    earth.add(arc); // 🔥 FØLG JORDEN
 
-    // Kuglen der bevæger sig
+    // Kuglen der bevæger sig (uafhængig af jorden)
     const sphereGeometry = new THREE.SphereGeometry(0.05, 8, 8);
     const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0xffff00 });
     const movingSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    scene.add(movingSphere);
+    scene.add(movingSphere); // 🔥 Uafhængig af jordens rotation
 
     // Tilføj til animationslisten
     animations.push({
@@ -108,6 +108,7 @@ window.addEventListener('resize', () => {
 function animate() {
     requestAnimationFrame(animate);
 
+    // Jordens rotation
     earth.rotation.y += 0.001;
 
     // Animation af kugler på buerne
