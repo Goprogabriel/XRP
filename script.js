@@ -175,12 +175,122 @@ function updateBlockDisplay() {
     }
     
     ledgerBlocks.innerHTML = recentBlocks.map(block => `
-        <div class="ledger-block">
+        <div class="ledger-block" onclick="showTransactions(${block.ledgerIndex})">
             <div class="block-number">#${block.ledgerIndex}</div>
             <div class="block-time">${block.timestamp} - ${block.txnCount} txn</div>
         </div>
     `).join('');
 }
+
+// Funktion til at vise transaktioner for en specifik blok
+async function showTransactions(ledgerIndex) {
+    const overlay = document.getElementById('transaction-overlay');
+    const title = document.getElementById('transaction-title');
+    const content = document.getElementById('transaction-content');
+    
+    // Vis overlay
+    overlay.style.display = 'flex';
+    title.textContent = `Transaktioner i blok #${ledgerIndex}`;
+    content.innerHTML = '<div class="loading-spinner">Henter transaktioner...</div>';
+    
+    try {
+        // Hent transaktioner fra XRP Ledger
+        const response = await fetch('https://xrplcluster.com', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                method: 'ledger',
+                params: [{
+                    ledger_index: ledgerIndex,
+                    transactions: true,
+                    expand: true
+                }]
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.result && data.result.ledger && data.result.ledger.transactions) {
+            const transactions = data.result.ledger.transactions;
+            displayTransactions(transactions);
+        } else {
+            content.innerHTML = '<div class="loading-spinner">Ingen transaktioner fundet i denne blok.</div>';
+        }
+    } catch (error) {
+        console.error('Fejl ved hentning af transaktioner:', error);
+        content.innerHTML = '<div class="loading-spinner" style="color: #ff4444;">Fejl ved hentning af transaktioner.</div>';
+    }
+}
+
+// Funktion til at vise transaktioner i panelet
+function displayTransactions(transactions) {
+    const content = document.getElementById('transaction-content');
+    
+    if (transactions.length === 0) {
+        content.innerHTML = '<div class="loading-spinner">Ingen transaktioner i denne blok.</div>';
+        return;
+    }
+    
+    const transactionHTML = transactions.map(tx => {
+        const txType = tx.TransactionType || 'Ukendt';
+        const account = tx.Account || 'N/A';
+        const destination = tx.Destination || 'N/A';
+        const amount = tx.Amount || 'N/A';
+        const fee = tx.Fee || 'N/A';
+        const hash = tx.hash || 'N/A';
+        
+        // Formatér beløb
+        let formattedAmount = 'N/A';
+        if (amount && typeof amount === 'string') {
+            formattedAmount = (parseInt(amount) / 1000000).toFixed(6) + ' XRP';
+        } else if (amount && typeof amount === 'object') {
+            formattedAmount = amount.value + ' ' + amount.currency;
+        }
+        
+        // Formatér fee
+        let formattedFee = 'N/A';
+        if (fee && typeof fee === 'string') {
+            formattedFee = (parseInt(fee) / 1000000).toFixed(6) + ' XRP';
+        }
+        
+        return `
+            <div class="transaction-item">
+                <div class="transaction-hash">Hash: ${hash}</div>
+                <div class="transaction-details">
+                    <div>
+                        <strong>Type:</strong> ${txType}<br>
+                        <strong>Fra:</strong> ${account.substring(0, 20)}...<br>
+                        <strong>Til:</strong> ${destination.substring(0, 20)}...
+                    </div>
+                    <div>
+                        <div class="transaction-amount">${formattedAmount}</div>
+                        <div class="transaction-fee">Fee: ${formattedFee}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    content.innerHTML = transactionHTML;
+}
+
+// Funktion til at lukke transaktionspanelet
+function closeTransactionPanel() {
+    const overlay = document.getElementById('transaction-overlay');
+    overlay.style.display = 'none';
+}
+
+// Gør funktionen tilgængelig globalt
+window.closeTransactionPanel = closeTransactionPanel;
+
+// Luk transaktionspanel ved klik udenfor
+document.getElementById('transaction-overlay').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeTransactionPanel();
+    }
+});
 
 // Start XRP Ledger forbindelse
 connectToXRPLedger();
