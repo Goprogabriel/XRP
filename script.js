@@ -11,6 +11,16 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+// Musekontroller til at dreje kloden
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.enableZoom = true;
+controls.enableRotate = true;
+controls.autoRotate = false;
+controls.minDistance = 7;
+controls.maxDistance = 20;
+
 // Lys
 const ambientLight = new THREE.AmbientLight(0xffffff, 1);
 scene.add(ambientLight);
@@ -90,6 +100,91 @@ function createShootingArc(fromLat, fromLon, toLat, toLon) {
 // ✔️ Liste over aktive animationer
 const animations = [];
 
+// XRP Ledger WebSocket forbindelse
+let ws;
+let recentBlocks = [];
+const maxBlocks = 10;
+
+function connectToXRPLedger() {
+    const connectionStatus = document.getElementById('connection-status');
+    const ledgerBlocks = document.getElementById('ledger-blocks');
+    
+    // Forbind til XRP Ledger WebSocket
+    ws = new WebSocket('wss://xrplcluster.com');
+    
+    ws.onopen = function() {
+        console.log('Forbundet til XRP Ledger');
+        connectionStatus.textContent = 'Forbundet til XRP Ledger';
+        connectionStatus.className = 'connection-status connected';
+        
+        // Lyt efter nye ledger lukninger
+        const subscribeMessage = {
+            "command": "subscribe",
+            "streams": ["ledger"]
+        };
+        ws.send(JSON.stringify(subscribeMessage));
+    };
+    
+    ws.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === 'ledgerClosed') {
+            addNewBlock(data);
+        }
+    };
+    
+    ws.onclose = function() {
+        console.log('Forbindelse til XRP Ledger lukket');
+        connectionStatus.textContent = 'Forbindelse afbrudt';
+        connectionStatus.className = 'connection-status disconnected';
+        
+        // Prøv at forbinde igen efter 3 sekunder
+        setTimeout(connectToXRPLedger, 3000);
+    };
+    
+    ws.onerror = function(error) {
+        console.error('XRP Ledger WebSocket fejl:', error);
+    };
+}
+
+function addNewBlock(ledgerData) {
+    const block = {
+        ledgerIndex: ledgerData.ledger_index,
+        ledgerHash: ledgerData.ledger_hash,
+        timestamp: new Date().toLocaleTimeString(),
+        txnCount: ledgerData.txn_count || 0
+    };
+    
+    // Tilføj til begyndelsen af listen
+    recentBlocks.unshift(block);
+    
+    // Behold kun de seneste 10 blokke
+    if (recentBlocks.length > maxBlocks) {
+        recentBlocks = recentBlocks.slice(0, maxBlocks);
+    }
+    
+    updateBlockDisplay();
+}
+
+function updateBlockDisplay() {
+    const ledgerBlocks = document.getElementById('ledger-blocks');
+    
+    if (recentBlocks.length === 0) {
+        ledgerBlocks.innerHTML = '<div class="ledger-block">Venter på data...</div>';
+        return;
+    }
+    
+    ledgerBlocks.innerHTML = recentBlocks.map(block => `
+        <div class="ledger-block">
+            <div class="block-number">#${block.ledgerIndex}</div>
+            <div class="block-time">${block.timestamp} - ${block.txnCount} txn</div>
+        </div>
+    `).join('');
+}
+
+// Start XRP Ledger forbindelse
+connectToXRPLedger();
+
 // ✔️ Punkter
 addMarker(55.6761, 12.5683);    // København
 addMarker(40.7128, -74.0060);   // New York
@@ -111,8 +206,11 @@ window.addEventListener('resize', () => {
 function animate() {
     requestAnimationFrame(animate);
 
-    // Jordens rotation
-    earth.rotation.y += 0.001;
+    // Opdater musekontroller
+    controls.update();
+
+    // Jordens rotation (langsommere nu da vi selv kan dreje)
+    earth.rotation.y += 0.0005;
 
     // Animation af kugler på buerne
     animations.forEach(obj => {

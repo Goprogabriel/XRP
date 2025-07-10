@@ -4,12 +4,80 @@
     <meta charset="UTF-8">
     <title>3D Globe</title>
     <style>
-        body { margin: 0; overflow: hidden; }
+        body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; }
         canvas { display: block; }
+        
+        #ledger-info {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .ledger-header {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #00ff88;
+        }
+        
+        .ledger-block {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+        }
+        
+        .ledger-block:last-child {
+            border-bottom: none;
+        }
+        
+        .block-number {
+            color: #00aaff;
+            font-weight: bold;
+        }
+        
+        .block-time {
+            color: #888;
+            font-size: 10px;
+        }
+        
+        .connection-status {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .connected {
+            background: #00ff88;
+            color: black;
+        }
+        
+        .disconnected {
+            background: #ff4444;
+            color: white;
+        }
     </style>
 </head>
 <body>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+    <div id="ledger-info">
+        <div class="connection-status disconnected" id="connection-status">
+            Forbinder til XRP Ledger...
+        </div>
+        <div class="ledger-header">Seneste XRP Blokke</div>
+        <div id="ledger-blocks">
+            <div class="ledger-block">Venter på data...</div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
