@@ -51,54 +51,266 @@ function latLongToVector3(lat, lon, radius = 5) {
     return new THREE.Vector3(x, y, z);
 }
 
-// ✔️ Tilføj marker/punkt (følger jorden)
-function addMarker(lat, lon) {
-    const position = latLongToVector3(lat, lon);
+// ✔️ Tilføj XRP validator marker
+function addValidatorMarker(validator) {
+    const position = latLongToVector3(validator.lat, validator.lon);
 
-    const geometry = new THREE.SphereGeometry(0.1, 8, 8);
-    const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+    // Større grøn kugle for validators
+    const geometry = new THREE.SphereGeometry(0.15, 16, 16);
+    const material = new THREE.MeshStandardMaterial({ 
+        color: 0x00ff88,
+        emissive: 0x002200,
+        emissiveIntensity: 0.3
+    });
     const marker = new THREE.Mesh(geometry, material);
-
     marker.position.copy(position);
+    
+    // Tilføj validator data til marker
+    marker.userData = {
+        validator: validator,
+        originalScale: 1,
+        pulsePhase: Math.random() * Math.PI * 2,
+        isValidator: true
+    };
+    
     earth.add(marker);
+    validatorMarkers.set(validator.pubkey, marker);
+    
+    // Tilføj tekst label
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = 256;
+    canvas.height = 64;
+    context.font = '14px Arial';
+    context.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    context.textAlign = 'center';
+    context.fillText(validator.city, 128, 28);
+    context.fillText(validator.country, 128, 45);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    const labelGeometry = new THREE.PlaneGeometry(1.2, 0.3);
+    const labelMaterial = new THREE.MeshBasicMaterial({ 
+        map: texture, 
+        transparent: true,
+        alphaTest: 0.1
+    });
+    const label = new THREE.Mesh(labelGeometry, labelMaterial);
+    
+    const labelPosition = latLongToVector3(validator.lat, validator.lon, 5.8);
+    label.position.copy(labelPosition);
+    label.lookAt(camera.position);
+    
+    // Tilføj label til marker's userData så det kan roteres med jorden
+    marker.userData.label = label;
+    earth.add(label);
+    
+    return marker;
 }
 
-// ✔️ Tegn bue (visuelt) og lav animeret skud (dynamisk)
-function createShootingArc(fromLat, fromLon, toLat, toLon) {
-    const start = latLongToVector3(fromLat, fromLon);
-    const end = latLongToVector3(toLat, toLon);
-
+// ✔️ Vis forbindelser mellem validators
+function createValidatorConnection(validator1, validator2) {
+    const start = latLongToVector3(validator1.lat, validator1.lon);
+    const end = latLongToVector3(validator2.lat, validator2.lon);
+    
+    // Beregn buens højde baseret på distancen
+    const distance = start.distanceTo(end);
+    const arcHeight = Math.min(distance * 0.3, 2.5);
+    
     const mid = start.clone().add(end).multiplyScalar(0.5);
-    mid.normalize().multiplyScalar(5 + 1.5);
-
+    mid.normalize().multiplyScalar(5 + arcHeight);
+    
     const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
-
-    // Tegn buen (visuelt)
     const points = curve.getPoints(50);
+    
+    // Grøn linje for validator forbindelser
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.LineBasicMaterial({ color: 0x00ffff });
-    const arc = new THREE.Line(geometry, material);
-    earth.add(arc);
+    const material = new THREE.LineBasicMaterial({ 
+        color: 0x00ff88,
+        transparent: true,
+        opacity: 0.3
+    });
+    const connection = new THREE.Line(geometry, material);
+    
+    earth.add(connection);
+    validatorConnections.push(connection);
+    
+    return connection;
+}
 
-    // Kugle der flyver (dynamisk)
-    const sphereGeometry = new THREE.SphereGeometry(0.05, 8, 8);
-    const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0xffff00 });
-    const movingSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    scene.add(movingSphere);
+// ✔️ Initialiser XRP validator network
+function initializeValidatorNetwork() {
+    // Tilføj alle validator markører
+    xrpValidatorNodes.forEach(validator => {
+        addValidatorMarker(validator);
+    });
+    
+    // Opret forbindelser mellem validators (simuleret netværk)
+    for (let i = 0; i < xrpValidatorNodes.length; i++) {
+        for (let j = i + 1; j < xrpValidatorNodes.length; j++) {
+            // Kun vis forbindelser til nærmeste validators for at undgå rod
+            const distance = Math.sqrt(
+                Math.pow(xrpValidatorNodes[i].lat - xrpValidatorNodes[j].lat, 2) +
+                Math.pow(xrpValidatorNodes[i].lon - xrpValidatorNodes[j].lon, 2)
+            );
+            
+            if (distance < 50 || Math.random() < 0.2) { // Vis kun nogle forbindelser
+                createValidatorConnection(xrpValidatorNodes[i], xrpValidatorNodes[j]);
+            }
+        }
+    }
+}
 
-    // Gem rute og kugle til animation (baseret på lat/lon)
-    animations.push({
-        fromLat,
-        fromLon,
-        toLat,
-        toLon,
-        sphere: movingSphere,
-        progress: Math.random()
+// ✔️ Simuler validator aktivitet
+function simulateValidatorActivity() {
+    // Vælg tilfældige validators til aktivitet
+    const activeValidators = xrpValidatorNodes.filter(() => Math.random() < 0.3);
+    
+    activeValidators.forEach(validator => {
+        const marker = validatorMarkers.get(validator.pubkey);
+        if (marker) {
+            // Skab pulserende lys effekt
+            marker.material.emissiveIntensity = 0.8;
+            setTimeout(() => {
+                marker.material.emissiveIntensity = 0.3;
+            }, 500);
+        }
     });
 }
 
-// ✔️ Liste over aktive animationer
+// addMarker function removed - not needed for XRP validators
+
+// ✔️ Tegn bue (visuelt) og lav animeret skud (dynamisk) - removed for XRP validators only
+
+// ✔️ Liste over aktive animationer - simplified for validators only
 const animations = [];
+
+// XRP Validator nodes med geografiske positioner
+const xrpValidatorNodes = [
+    { 
+        name: "Ripple Lab (San Francisco)", 
+        lat: 37.7749, 
+        lon: -122.4194, 
+        pubkey: "nHUPKoGr78vEFANjXfLpGYuBqPwXXq1dHgTaJrfGtQnZcFjFdJPR",
+        country: "USA",
+        city: "San Francisco"
+    },
+    { 
+        name: "Ripple Lab (Dublin)", 
+        lat: 53.3498, 
+        lon: -6.2603, 
+        pubkey: "nHUTh2DRMx4TH8iNc3qYnFLzLXpqxoVZBJMUHNbxJEkQdLNSqpXH",
+        country: "Ireland",
+        city: "Dublin"
+    },
+    { 
+        name: "Ripple Lab (Singapore)", 
+        lat: 1.3521, 
+        lon: 103.8198, 
+        pubkey: "nHUP3pWBaEHcfzTdDBdKj9yFfSTJUdJGz6PRAskLJCHtmLTDRKvH",
+        country: "Singapore",
+        city: "Singapore"
+    },
+    { 
+        name: "Coil (New York)", 
+        lat: 40.7128, 
+        lon: -74.0060, 
+        pubkey: "nHUryiyDqEtyWVtFG24AAhaYjMf9FRLietQcQrcbdN5PjjWjCRKN",
+        country: "USA",
+        city: "New York"
+    },
+    { 
+        name: "Bithomp (Netherlands)", 
+        lat: 52.3676, 
+        lon: 4.9041, 
+        pubkey: "nHULqGBkJtWeNFjhTzYeAsHA3qKKS7HoBh8CV3BAGTGMZuepEhWC",
+        country: "Netherlands",
+        city: "Amsterdam"
+    },
+    { 
+        name: "XRPL Labs (Netherlands)", 
+        lat: 52.3676, 
+        lon: 4.9041, 
+        pubkey: "nHUn13jKRSvyRW5HGPqmMjvAJGELzSLVZpKAMBXTMKNcLnYtJSgH",
+        country: "Netherlands",
+        city: "Amsterdam"
+    },
+    { 
+        name: "Alloy Networks (USA)", 
+        lat: 39.0458, 
+        lon: -76.6413, 
+        pubkey: "nHUDHXNKHtQnPn6pKfGpEcbSvw8VhGbBPQFhKWo4kqEYhpMqZwdh",
+        country: "USA",
+        city: "Baltimore"
+    },
+    { 
+        name: "Gatehub (UK)", 
+        lat: 51.5074, 
+        lon: -0.1278, 
+        pubkey: "nHUkKNxGWFqM41U5YWDdBvhQmEUvNGmUqMGcFnfT4gRQdRPEpJcS",
+        country: "UK",
+        city: "London"
+    },
+    { 
+        name: "Sologenic (Canada)", 
+        lat: 43.6532, 
+        lon: -79.3832, 
+        pubkey: "nHUBqFKgCsS7P6RmxXQyNVnVk2PVVvEMkjhXCJCk8kfmZtQJhDDd",
+        country: "Canada",
+        city: "Toronto"
+    },
+    { 
+        name: "Validator (Tokyo)", 
+        lat: 35.6762, 
+        lon: 139.6503, 
+        pubkey: "nHUVFHTdJwdNUbUeUJFW5q4NQHxBYGfJsZNHdBrUnTNzQCpGHnLY",
+        country: "Japan",
+        city: "Tokyo"
+    },
+    { 
+        name: "Validator (Sydney)", 
+        lat: -33.8688, 
+        lon: 151.2093, 
+        pubkey: "nHUKVKfBmYdSVKuPRMKjmyDqBFZjKfxJbVtHDTM4TQEJ3RaKdVUH",
+        country: "Australia",
+        city: "Sydney"
+    },
+    { 
+        name: "Validator (Mumbai)", 
+        lat: 19.0760, 
+        lon: 72.8777, 
+        pubkey: "nHUJunGYCLWqZFvxGBNFfBnpwYxBGJhKGQfFnJNqRSgEQJgHsVfv",
+        country: "India",
+        city: "Mumbai"
+    },
+    { 
+        name: "Validator (São Paulo)", 
+        lat: -23.5505, 
+        lon: -46.6333, 
+        pubkey: "nHUKoGrxnHwcKpJrVSgRSZBLFq8qmJGLdDxKLKgLJGSfGhLwRrxK",
+        country: "Brazil",
+        city: "São Paulo"
+    },
+    { 
+        name: "Validator (Frankfurt)", 
+        lat: 50.1109, 
+        lon: 8.6821, 
+        pubkey: "nHUJbHBY7fGWMjJsTSjVmLGxPzhhqBbczK4ysBG1BNWPCqJgMjwS",
+        country: "Germany",
+        city: "Frankfurt"
+    },
+    { 
+        name: "Validator (Seoul)", 
+        lat: 37.5665, 
+        lon: 126.9780, 
+        pubkey: "nHUKBvTyqfVMN3LXZNNfFYcnhqBCQHdLFLcqVNNWzBMSdQGGLjGD",
+        country: "South Korea",
+        city: "Seoul"
+    }
+];
+
+// Aktive validator nodes og deres markører
+const validatorMarkers = new Map();
+const validatorConnections = [];
 
 // XRP Ledger WebSocket forbindelse
 let ws;
@@ -162,6 +374,9 @@ function addNewBlock(ledgerData) {
     if (recentBlocks.length > maxBlocks) {
         recentBlocks = recentBlocks.slice(0, maxBlocks);
     }
+    
+    // Simuler validator aktivitet når ny blok kommer
+    simulateValidatorActivity();
     
     updateBlockDisplay();
 }
@@ -292,18 +507,66 @@ document.getElementById('transaction-overlay').addEventListener('click', functio
     }
 });
 
+// Funktion til at vise validator info
+function showValidatorInfo(validator) {
+    const infoPanel = document.getElementById('validator-info');
+    const nameElement = document.getElementById('validator-name');
+    const locationElement = document.getElementById('validator-location');
+    const pubkeyElement = document.getElementById('validator-pubkey');
+    const statusElement = document.getElementById('validator-status');
+    
+    nameElement.textContent = validator.name;
+    locationElement.textContent = `${validator.city}, ${validator.country}`;
+    pubkeyElement.textContent = validator.pubkey.substring(0, 20) + '...';
+    statusElement.textContent = 'Aktiv';
+    statusElement.style.color = '#00ff88';
+    
+    infoPanel.style.display = 'block';
+}
+
+// Funktion til at lukke validator info
+function closeValidatorInfo() {
+    document.getElementById('validator-info').style.display = 'none';
+}
+
+// Gør funktionen tilgængelig globalt
+window.closeValidatorInfo = closeValidatorInfo;
+
+// Mouse/click events til validator markers
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+function onMouseClick(event) {
+    // Beregn mouse position i normalized device coordinates
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    
+    // Opdater raycaster
+    raycaster.setFromCamera(mouse, camera);
+    
+    // Find intersections med validator markers
+    const validatorObjects = Array.from(validatorMarkers.values());
+    const intersects = raycaster.intersectObjects(validatorObjects);
+    
+    if (intersects.length > 0) {
+        const clickedMarker = intersects[0].object;
+        if (clickedMarker.userData && clickedMarker.userData.validator) {
+            showValidatorInfo(clickedMarker.userData.validator);
+        }
+    }
+}
+
+// Tilføj event listener til click
+window.addEventListener('click', onMouseClick);
+
 // Start XRP Ledger forbindelse
 connectToXRPLedger();
 
-// ✔️ Punkter
-addMarker(55.6761, 12.5683);    // København
-addMarker(40.7128, -74.0060);   // New York
-addMarker(35.6762, 139.6503);   // Tokyo
+// Initialiser XRP validator network
+initializeValidatorNetwork();
 
-// ✔️ Buer med skud
-createShootingArc(55.6761, 12.5683, 40.7128, -74.0060);  // København → New York
-createShootingArc(40.7128, -74.0060, 35.6762, 139.6503); // New York → Tokyo
-createShootingArc(35.6762, 139.6503, 55.6761, 12.5683);  // Tokyo → København
+// Simuler regelmæssig validator aktivitet
+setInterval(simulateValidatorActivity, 5000);
 
 // ✔️ Responsivt
 window.addEventListener('resize', () => {
@@ -322,27 +585,13 @@ function animate() {
     // Jordens rotation (langsommere nu da vi selv kan dreje)
     earth.rotation.y += 0.0005;
 
-    // Animation af kugler på buerne
-    animations.forEach(obj => {
-        obj.progress += 0.01;
-        if (obj.progress > 1) obj.progress = 0;
-
-        // Beregn ny start og slut position baseret på jordens rotation
-        const start = latLongToVector3(obj.fromLat, obj.fromLon).applyAxisAngle(
-            new THREE.Vector3(0, 1, 0),
-            earth.rotation.y
-        );
-        const end = latLongToVector3(obj.toLat, obj.toLon).applyAxisAngle(
-            new THREE.Vector3(0, 1, 0),
-            earth.rotation.y
-        );
-        const mid = start.clone().add(end).multiplyScalar(0.5);
-        mid.normalize().multiplyScalar(5 + 1.5);
-
-        const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
-
-        const point = curve.getPoint(obj.progress);
-        obj.sphere.position.copy(point);
+    // Animér validator markører med pulserende effekt
+    validatorMarkers.forEach((marker, pubkey) => {
+        if (marker.userData) {
+            marker.userData.pulsePhase += 0.05;
+            const scale = 1 + Math.sin(marker.userData.pulsePhase) * 0.1;
+            marker.scale.setScalar(scale);
+        }
     });
 
     renderer.render(scene, camera);

@@ -164,6 +164,99 @@
             padding: 20px;
             color: #00ff88;
         }
+        
+        /* Validator info panel */
+        #validator-info {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+            display: none;
+        }
+        
+        .validator-header {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #00ff88;
+        }
+        
+        .validator-stat {
+            padding: 3px 0;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .validator-stat:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #00aaff;
+            font-weight: bold;
+        }
+        
+        .stat-value {
+            color: #888;
+            float: right;
+        }
+        
+        .network-status {
+            text-align: center;
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 5px;
+            font-size: 11px;
+        }
+        
+        .close-validator-info {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: #ff4444;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        /* Legend panel */
+        #legend {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .legend-green { background: #00ff88; }
+        .legend-red { background: #ff0000; }
+        .legend-cyan { background: #00ffff; }
     </style>
 </head>
 <body>
@@ -187,6 +280,46 @@
             <div id="transaction-content">
                 <div class="loading-spinner">Henter transaktioner...</div>
             </div>
+        </div>
+    </div>
+    
+    <!-- Validator info panel -->
+    <div id="validator-info">
+        <button class="close-validator-info" onclick="closeValidatorInfo()">×</button>
+        <div class="validator-header">XRP Validator Node</div>
+        <div id="validator-details">
+            <div class="validator-stat">
+                <span class="stat-label">Navn:</span>
+                <span class="stat-value" id="validator-name">-</span>
+            </div>
+            <div class="validator-stat">
+                <span class="stat-label">Lokation:</span>
+                <span class="stat-value" id="validator-location">-</span>
+            </div>
+            <div class="validator-stat">
+                <span class="stat-label">Public Key:</span>
+                <span class="stat-value" id="validator-pubkey">-</span>
+            </div>
+            <div class="validator-stat">
+                <span class="stat-label">Status:</span>
+                <span class="stat-value" id="validator-status">Aktiv</span>
+            </div>
+        </div>
+        <div class="network-status">
+            Del af XRP Ledger Konsensus Netværk
+        </div>
+    </div>
+    
+    <!-- Legend panel -->
+    <div id="legend">
+        <div class="validator-header">Forklaring</div>
+        <div class="legend-item">
+            <div class="legend-color legend-green"></div>
+            <span>XRP Validator Nodes</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color legend-cyan"></div>
+            <span>Netværksforbindelser</span>
         </div>
     </div>
     
