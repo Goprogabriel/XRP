@@ -7,14 +7,14 @@ export class UIManager {
         this.setupEventListeners();
         this.setupModernInteractions();
     }
-    
+
     setupEventListeners() {
         // Mouse/click events til validator markers
         window.addEventListener('click', (event) => this.onMouseClick(event));
-        
+
         // Hover effects for 3D objects
         window.addEventListener('mousemove', (event) => this.onMouseMove(event));
-        
+
         // Luk transaktionspanel ved klik udenfor
         document.getElementById('transaction-overlay').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) {
@@ -24,7 +24,7 @@ export class UIManager {
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => this.onKeyDown(e));
-        
+
         // Window resize handler
         window.addEventListener('resize', () => this.onWindowResize());
     }
@@ -32,10 +32,10 @@ export class UIManager {
     setupModernInteractions() {
         // Add pulse effect to connection status
         this.animateConnectionStatus();
-        
+
         // Add smooth transitions to panels
         this.addPanelTransitions();
-        
+
         // Setup modern loading states
         this.setupLoadingStates();
     }
@@ -80,7 +80,7 @@ export class UIManager {
             this.closeTransactionPanel();
             this.closeValidatorInfo();
         }
-        
+
         // Space to toggle legend visibility
         if (event.key === ' ') {
             event.preventDefault();
@@ -92,7 +92,7 @@ export class UIManager {
         // Handle responsive adjustments
         const isMobile = window.innerWidth <= 768;
         const panels = document.querySelectorAll('.glass-panel');
-        
+
         panels.forEach(panel => {
             if (isMobile) {
                 panel.style.transform = 'scale(0.9)';
@@ -106,25 +106,25 @@ export class UIManager {
         // Update mouse position for raycasting
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        
+
         // Add subtle hover effects
         this.updateHoverEffects();
     }
 
     updateHoverEffects() {
         if (!window.camera) return;
-        
+
         this.raycaster.setFromCamera(this.mouse, window.camera);
         const validatorObjects = this.validatorNetwork.getValidatorMarkers();
         const intersects = this.raycaster.intersectObjects(validatorObjects);
-        
+
         // Reset all hover states
         validatorObjects.forEach(obj => {
             if (obj.material) {
                 obj.material.emissive.setHex(0x000000);
             }
         });
-        
+
         // Apply hover effect to intersected object
         if (intersects.length > 0) {
             const hoveredObject = intersects[0].object;
@@ -136,19 +136,19 @@ export class UIManager {
             document.body.style.cursor = 'default';
         }
     }
-    
+
     onMouseClick(event) {
         // Beregn mouse position i normalized device coordinates
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        
+
         // Opdater raycaster
         this.raycaster.setFromCamera(this.mouse, window.camera);
-        
+
         // Find intersections med validator markers
         const validatorObjects = this.validatorNetwork.getValidatorMarkers();
         const intersects = this.raycaster.intersectObjects(validatorObjects);
-        
+
         if (intersects.length > 0) {
             const clickedMarker = intersects[0].object;
             if (clickedMarker.userData && clickedMarker.userData.validator) {
@@ -173,7 +173,7 @@ export class UIManager {
             top: ${event.clientY}px;
             animation: ripple 0.6s ease-out;
         `;
-        
+
         const style = document.createElement('style');
         style.textContent = `
             @keyframes ripple {
@@ -182,14 +182,14 @@ export class UIManager {
             }
         `;
         document.head.appendChild(style);
-        
+
         document.body.appendChild(ripple);
         setTimeout(() => {
             ripple.remove();
             style.remove();
         }, 600);
     }
-    
+
     // Vis validator info med moderne animation
     showValidatorInfo(validator) {
         const infoPanel = document.getElementById('validator-info');
@@ -197,10 +197,10 @@ export class UIManager {
         const locationElement = document.getElementById('validator-location');
         const pubkeyElement = document.getElementById('validator-pubkey');
         const statusElement = document.getElementById('validator-status');
-        
+
         // Add loading state
         this.setValidatorLoading(true);
-        
+
         // Simulate data loading delay for smooth UX
         setTimeout(() => {
             nameElement.textContent = validator.name;
@@ -208,14 +208,25 @@ export class UIManager {
             pubkeyElement.textContent = validator.pubkey.substring(0, 20) + '...';
             statusElement.textContent = 'Aktiv';
             statusElement.style.color = 'var(--primary-color)';
-            
+
             this.setValidatorLoading(false);
             infoPanel.style.display = 'block';
-            
+
+            // Highlight validator connection logic could go here
+
             // Add success animation
             infoPanel.classList.add('glow-effect');
             setTimeout(() => infoPanel.classList.remove('glow-effect'), 2000);
         }, 200);
+    }
+
+    // Nye UI tilføjelser
+    getSearchValue() {
+        return document.getElementById('search-address').value;
+    }
+
+    getWhaleFilterState() {
+        return document.getElementById('filter-whales').checked;
     }
 
     setValidatorLoading(isLoading) {
@@ -237,7 +248,7 @@ export class UIManager {
             setTimeout(() => legend.style.display = 'none', 500);
         }
     }
-    
+
     // Luk validator info med animation
     closeValidatorInfo() {
         const infoPanel = document.getElementById('validator-info');
@@ -247,15 +258,15 @@ export class UIManager {
             infoPanel.style.animation = '';
         }, 300);
     }
-    
+
     // Luk transaktionspanel med animation
     closeTransactionPanel() {
         const overlay = document.getElementById('transaction-overlay');
         const panel = document.getElementById('transaction-panel');
-        
+
         panel.style.animation = 'slideOutScale 0.3s ease';
         overlay.style.animation = 'fadeOut 0.3s ease';
-        
+
         setTimeout(() => {
             overlay.style.display = 'none';
             panel.style.animation = '';
@@ -294,14 +305,14 @@ export class UIManager {
             animation: slideInRight 0.3s ease;
             max-width: 300px;
         `;
-        
+
         const colors = {
             info: 'var(--secondary-color)',
             success: 'var(--primary-color)',
             warning: 'var(--warning-color)',
             error: 'var(--error-color)'
         };
-        
+
         notification.style.borderColor = colors[type];
         notification.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -309,9 +320,9 @@ export class UIManager {
                 <span>${message}</span>
             </div>
         `;
-        
+
         document.body.appendChild(notification);
-        
+
         setTimeout(() => {
             notification.style.animation = 'slideOutRight 0.3s ease';
             setTimeout(() => notification.remove(), 300);

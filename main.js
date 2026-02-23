@@ -9,94 +9,124 @@ class XRPVisualizationApp {
     constructor() {
         this.init();
     }
-    
+
     init() {
         // Initialiser scene
         this.sceneManager = new SceneManager();
-        
+
         // Initialiser validator network
         this.validatorNetwork = new ValidatorNetwork(this.sceneManager.earth);
         this.validatorNetwork.initializeValidatorNetwork();
-        
+
         // Initialiser transaction visualizer
         this.transactionVisualizer = new TransactionVisualizer(this.sceneManager.earth);
-        
+
         // Initialiser XRP Ledger manager
         this.xrpLedgerManager = new XRPLedgerManager(
-            this.transactionVisualizer, 
+            this.transactionVisualizer,
             this.validatorNetwork
         );
-        
+
         // Initialiser UI manager
         this.uiManager = new UIManager(this.validatorNetwork);
-        
+
         // Show welcome notification
         setTimeout(() => {
             this.uiManager.showNotification('XRP Ledger Visualization startet', 'success');
         }, 1000);
-        
+
         // Gør camera tilgængelig globalt for UI events
         window.camera = this.sceneManager.camera;
-        
+
         // Gør app tilgængelig globalt for UI callbacks
         window.xrpApp = this;
-        
+
         // Start forbindelse til XRP Ledger
         this.xrpLedgerManager.connectToXRPLedger();
-        
+
         // Update connection status in UI
         this.uiManager.updateConnectionStatus(false);
-        
+
         // Simulate connection success after delay
         setTimeout(() => {
             this.uiManager.updateConnectionStatus(true);
             this.uiManager.showNotification('Forbundet til XRP Ledger', 'success');
         }, 3000);
-        
+
         // Start regelmæssige opdateringer
         this.startRegularUpdates();
-        
+
         // Start animation loop
         this.animate();
     }
-    
+
     startRegularUpdates() {
         // Simuler regelmæssig validator aktivitet
         setInterval(() => {
             this.validatorNetwork.simulateValidatorActivity();
         }, 5000);
     }
-    
+
     animate() {
         requestAnimationFrame(() => this.animate());
-        
+
         // Render scene
         this.sceneManager.render();
-        
+
         // Animér validators
         this.validatorNetwork.animateValidators();
-        
+
         // Opdater animerede transaktioner
         this.transactionVisualizer.updateMovingDots();
-        
+
         // Ryd gamle transaktioner
         this.transactionVisualizer.cleanupOldTransactionBeams();
-        
+
         // Opdater transaktionsstatistikker
         this.transactionVisualizer.updateTransactionStats();
     }
-    
+
     // Metoder til at eksponere funktionalitet til UI
     showTransactions(ledgerIndex) {
         this.xrpLedgerManager.showTransactions(ledgerIndex);
     }
-    
+
     closeTransactionPanel() {
         this.uiManager.closeTransactionPanel();
     }
-    
+
     closeValidatorInfo() {
         this.uiManager.closeValidatorInfo();
+    }
+
+    // Nye funktioner til UI callbacks
+    searchAddress() {
+        const address = this.uiManager.getSearchValue();
+        if (address) {
+            this.transactionVisualizer.setSearchHighlight(address);
+            this.uiManager.showNotification(`Søger efter ${address}...`, 'info');
+            // Check if address is in our map to center globe?
+            // For now just highlight next time it appears.
+        } else {
+            this.transactionVisualizer.setSearchHighlight(null);
+        }
+    }
+
+    toggleWhaleFilter(isActive) {
+        this.transactionVisualizer.setWhaleFilter(isActive);
+        const msg = isActive ? 'Kun Whale transaktioner vises' : 'Alle transaktioner vises';
+        this.uiManager.showNotification(msg, 'info');
+    }
+
+    toggleAutoRotate() {
+        const isRotating = this.sceneManager.toggleAutoRotate();
+        const msg = isRotating ? 'Auto-rotation slået til' : 'Auto-rotation slået fra';
+        this.uiManager.showNotification(msg, 'info');
+    }
+
+    resetCamera() {
+        this.sceneManager.resetCamera();
+        this.uiManager.showNotification('Kamera nulstillet', 'info');
     }
 }
 

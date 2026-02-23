@@ -1,121 +1,121 @@
 // XRP Validator nodes med geografiske positioner
 export const xrpValidatorNodes = [
-    { 
-        name: "Ripple Lab (San Francisco)", 
-        lat: 37.7749, 
-        lon: -122.4194, 
+    {
+        name: "Ripple Lab (San Francisco)",
+        lat: 37.7749,
+        lon: -122.4194,
         pubkey: "nHUPKoGr78vEFANjXfLpGYuBqPwXXq1dHgTaJrfGtQnZcFjFdJPR",
         country: "USA",
         city: "San Francisco"
     },
-    { 
-        name: "Ripple Lab (Dublin)", 
-        lat: 53.3498, 
-        lon: -6.2603, 
+    {
+        name: "Ripple Lab (Dublin)",
+        lat: 53.3498,
+        lon: -6.2603,
         pubkey: "nHUTh2DRMx4TH8iNc3qYnFLzLXpqxoVZBJMUHNbxJEkQdLNSqpXH",
         country: "Ireland",
         city: "Dublin"
     },
-    { 
-        name: "Ripple Lab (Singapore)", 
-        lat: 1.3521, 
-        lon: 103.8198, 
+    {
+        name: "Ripple Lab (Singapore)",
+        lat: 1.3521,
+        lon: 103.8198,
         pubkey: "nHUP3pWBaEHcfzTdDBdKj9yFfSTJUdJGz6PRAskLJCHtmLTDRKvH",
         country: "Singapore",
         city: "Singapore"
     },
-    { 
-        name: "Coil (New York)", 
-        lat: 40.7128, 
-        lon: -74.0060, 
+    {
+        name: "Coil (New York)",
+        lat: 40.7128,
+        lon: -74.0060,
         pubkey: "nHUryiyDqEtyWVtFG24AAhaYjMf9FRLietQcQrcbdN5PjjWjCRKN",
         country: "USA",
         city: "New York"
     },
-    { 
-        name: "Bithomp (Netherlands)", 
-        lat: 52.3676, 
-        lon: 4.9041, 
+    {
+        name: "Bithomp (Netherlands)",
+        lat: 52.3676,
+        lon: 4.9041,
         pubkey: "nHULqGBkJtWeNFjhTzYeAsHA3qKKS7HoBh8CV3BAGTGMZuepEhWC",
         country: "Netherlands",
         city: "Amsterdam"
     },
-    { 
-        name: "XRPL Labs (Netherlands)", 
-        lat: 52.3676, 
-        lon: 4.9041, 
+    {
+        name: "XRPL Labs (Netherlands)",
+        lat: 52.3676,
+        lon: 4.9041,
         pubkey: "nHUn13jKRSvyRW5HGPqmMjvAJGELzSLVZpKAMBXTMKNcLnYtJSgH",
         country: "Netherlands",
         city: "Amsterdam"
     },
-    { 
-        name: "Alloy Networks (USA)", 
-        lat: 39.0458, 
-        lon: -76.6413, 
+    {
+        name: "Alloy Networks (USA)",
+        lat: 39.0458,
+        lon: -76.6413,
         pubkey: "nHUDHXNKHtQnPn6pKfGpEcbSvw8VhGbBPQFhKWo4kqEYhpMqZwdh",
         country: "USA",
         city: "Baltimore"
     },
-    { 
-        name: "Gatehub (UK)", 
-        lat: 51.5074, 
-        lon: -0.1278, 
+    {
+        name: "Gatehub (UK)",
+        lat: 51.5074,
+        lon: -0.1278,
         pubkey: "nHUkKNxGWFqM41U5YWDdBvhQmEUvNGmUqMGcFnfT4gRQdRPEpJcS",
         country: "UK",
         city: "London"
     },
-    { 
-        name: "Sologenic (Canada)", 
-        lat: 43.6532, 
-        lon: -79.3832, 
+    {
+        name: "Sologenic (Canada)",
+        lat: 43.6532,
+        lon: -79.3832,
         pubkey: "nHUBqFKgCsS7P6RmxXQyNVnVk2PVVvEMkjhXCJCk8kfmZtQJhDDd",
         country: "Canada",
         city: "Toronto"
     },
-    { 
-        name: "Validator (Tokyo)", 
-        lat: 35.6762, 
-        lon: 139.6503, 
+    {
+        name: "Validator (Tokyo)",
+        lat: 35.6762,
+        lon: 139.6503,
         pubkey: "nHUVFHTdJwdNUbUeUJFW5q4NQHxBYGfJsZNHdBrUnTNzQCpGHnLY",
         country: "Japan",
         city: "Tokyo"
     },
-    { 
-        name: "Validator (Sydney)", 
-        lat: -33.8688, 
-        lon: 151.2093, 
+    {
+        name: "Validator (Sydney)",
+        lat: -33.8688,
+        lon: 151.2093,
         pubkey: "nHUKVKfBmYdSVKuPRMKjmyDqBFZjKfxJbVtHDTM4TQEJ3RaKdVUH",
         country: "Australia",
         city: "Sydney"
     },
-    { 
-        name: "Validator (Mumbai)", 
-        lat: 19.0760, 
-        lon: 72.8777, 
+    {
+        name: "Validator (Mumbai)",
+        lat: 19.0760,
+        lon: 72.8777,
         pubkey: "nHUJunGYCLWqZFvxGBNFfBnpwYxBGJhKGQfFnJNqRSgEQJgHsVfv",
         country: "India",
         city: "Mumbai"
     },
-    { 
-        name: "Validator (São Paulo)", 
-        lat: -23.5505, 
-        lon: -46.6333, 
+    {
+        name: "Validator (São Paulo)",
+        lat: -23.5505,
+        lon: -46.6333,
         pubkey: "nHUKoGrxnHwcKpJrVSgRSZBLFq8qmJGLdDxKLKgLJGSfGhLwRrxK",
         country: "Brazil",
         city: "São Paulo"
     },
-    { 
-        name: "Validator (Frankfurt)", 
-        lat: 50.1109, 
-        lon: 8.6821, 
+    {
+        name: "Validator (Frankfurt)",
+        lat: 50.1109,
+        lon: 8.6821,
         pubkey: "nHUJbHBY7fGWMjJsTSjVmLGxPzhhqBbczK4ysBG1BNWPCqJgMjwS",
         country: "Germany",
         city: "Frankfurt"
     },
-    { 
-        name: "Validator (Seoul)", 
-        lat: 37.5665, 
-        lon: 126.9780, 
+    {
+        name: "Validator (Seoul)",
+        lat: 37.5665,
+        lon: 126.9780,
         pubkey: "nHUKBvTyqfVMN3LXZNNfFYcnhqBCQHdLFLcqVNNWzBMSdQGGLjGD",
         country: "South Korea",
         city: "Seoul"
@@ -143,7 +143,26 @@ export const sampleAddressLocations = [
     { lat: 31.2304, lon: 121.4737 },  // Shanghai
     { lat: 25.2048, lon: 55.2708 },   // Dubai
     { lat: -34.6037, lon: -58.3816 }, // Buenos Aires
-    { lat: 6.5244, lon: 3.3792 }      // Lagos
+    { lat: 6.5244, lon: 3.3792 },      // Lagos
+    { lat: 48.8566, lon: 2.3522 },    // Paris
+    { lat: 41.9028, lon: 12.4964 },   // Rom
+    { lat: 55.6761, lon: 12.5683 },   // København
+    { lat: 59.3293, lon: 18.0686 },   // Stockholm
+    { lat: 60.1695, lon: 24.941 },    // Helsinki
+    { lat: 52.52, lon: 13.405 },      // Berlin
+    { lat: 40.4168, lon: -3.7038 },   // Madrid
+    { lat: 38.7223, lon: -9.1393 },   // Lissabon
+    { lat: 30.0444, lon: 31.2357 },   // Cairo
+    { lat: -26.2041, lon: 28.0473 },  // Johannesburg
+    { lat: 21.3069, lon: -157.8583 }, // Honolulu
+    { lat: 34.0522, lon: -118.2437 }, // Los Angeles
+    { lat: 47.6062, lon: -122.3321 }, // Seattle
+    { lat: 28.6139, lon: 77.209 },    // New Delhi
+    { lat: 23.1291, lon: 113.2644 },  // Guangzhou
+    { lat: 22.3193, lon: 114.1694 },  // Hong Kong
+    { lat: -33.9249, lon: 18.4241 },  // Cape Town
+    { lat: -37.8136, lon: 144.9631 }, // Melbourne
+    { lat: -41.2865, lon: 174.7762 }  // Wellington
 ];
 
 // Utility functions
